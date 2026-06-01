@@ -1,5 +1,5 @@
 import "./App.css";
-import ChatWindow from "./pages/ChatWindow";
+import ChatWindow from "./pages/ChatLayout";
 // import SignUp from "./pages/SignUp";
 
 function App() {

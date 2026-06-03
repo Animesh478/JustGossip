@@ -27,20 +27,32 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         unique: true,
       },
-      password_hash: {
+      passwordHash: {
         type: DataTypes.STRING,
         allowNull: false,
+        field: "password_hash",
       },
-      profile_picture_url: DataTypes.STRING,
+      phoneNumber: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
+        field: "phone_number",
+      },
+      profilePictureUrl: {
+        type: DataTypes.STRING,
+        field: "profile_picture_url",
+      },
       about: DataTypes.TEXT,
-      last_seen_at: {
+      lastSeenAt: {
         type: DataTypes.DATE,
         allowNull: true,
+        field: "last_seen_at",
       },
-      is_online: {
+      isOnline: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
         defaultValue: false,
+        field: "is_online",
       },
     },
     {

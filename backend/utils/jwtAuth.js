@@ -5,7 +5,7 @@ const createJWT = function (user) {
   const payload = {
     id: user.id,
     email: user.email,
-    name: user.fullName,
+    username: user.username,
     phoneNumber: user.phoneNumber,
   };
 
@@ -15,6 +15,11 @@ const createJWT = function (user) {
   return token;
 };
 
+const verifyJwt = function (token) {
+  return jwt.verify(token, process.env.JWT_SECRET_KEY);
+};
+
 module.exports = {
   createJWT,
+  verifyJwt,
 };

@@ -11,6 +11,17 @@ const addMessage = async function (userId, message) {
   return newMessage;
 };
 
+const fetchMessage = async function (userId) {
+  const messages = await Messages.findAll({
+    where: {
+      senderId: userId,
+    },
+    order: [["created_at", "ASC"]],
+  });
+  return messages;
+};
+
 module.exports = {
   addMessage,
+  fetchMessage,
 };

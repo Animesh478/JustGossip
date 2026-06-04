@@ -1,4 +1,4 @@
-const { addMessage } = require("../services/message.service");
+const { addMessage, fetchMessage } = require("../services/message.service");
 
 const sendMessage = async function (req, res) {
   try {
@@ -18,6 +18,20 @@ const sendMessage = async function (req, res) {
   }
 };
 
+const getMessage = async function (req, res) {
+  const userDetails = req.user;
+  const userId = userDetails.id;
+
+  try {
+    const messages = await fetchMessage(userId);
+    res.status(200).json({ messages });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
   sendMessage,
+  getMessage,
 };

@@ -22,7 +22,7 @@ const signupUser = async function (userData) {
   const hashedPassword = await createHashedPassword(userData.password);
 
   const user = await User.create({
-    username: userData.name,
+    username: userData.username,
     email,
     passwordHash: hashedPassword,
     phoneNumber,

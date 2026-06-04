@@ -5,11 +5,18 @@ import "./index.css";
 import ChatLayout from "./pages/ChatLayout.jsx";
 import SignUp from "./pages/SignUp.jsx";
 import Login from "./pages/Login.jsx";
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
 const router = createBrowserRouter([
   {
-    path: "/",
-    element: <ChatLayout />,
+    path: "/chat",
+    element: <ProtectedRoute />,
+    children: [
+      {
+        index: true,
+        element: <ChatLayout />,
+      },
+    ],
   },
   {
     path: "/signup",

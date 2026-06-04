@@ -1,4 +1,8 @@
-const { signupUser, loginUser } = require("../services/authentication.service");
+const {
+  signupUser,
+  loginUser,
+  authenticateUser,
+} = require("../services/authentication.service");
 
 const signUp = async function (req, res) {
   const userData = req.body;
@@ -30,11 +34,25 @@ const login = async function (req, res) {
     });
     res.status(200).json({ message: "Login successful" });
   } catch (error) {
-    res.status(error.statusCode).json({ error: error.message });
+    const errorStatusCode = error.statusCode || 500;
+    res.status(errorStatusCode).json({ error: error.message });
+  }
+};
+
+const authenticate = async function (req, res) {
+  const userData = req.user;
+
+  try {
+    const user = await authenticateUser(userData);
+    return res.status(200).json({ data: user });
+  } catch (error) {
+    const errorStatusCode = error.statusCode || 500;
+    return res.status(errorStatusCode).json({ error: error.message });
   }
 };
 
 module.exports = {
   signUp,
   login,
+  authenticate,
 };

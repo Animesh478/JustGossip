@@ -9,6 +9,7 @@ const authMiddleware = function (req, res, next) {
   try {
     const userPayload = verifyJwt(token);
     req.user = userPayload;
+    next();
   } catch (error) {
     // if the token has expired
     res.clearCookie("access_token");

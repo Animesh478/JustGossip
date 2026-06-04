@@ -34,7 +34,7 @@ const loginUser = async function (userData) {
 
   const existingUserInstance = await User.findOne({ where: { email } });
   if (!existingUserInstance) {
-    const error = new Error("Invalid email");
+    const error = new Error("Invalid credentials");
     error.statusCode = 401;
     throw error;
   }
@@ -46,7 +46,7 @@ const loginUser = async function (userData) {
     existingUser.passwordHash,
   );
   if (!isMatch) {
-    const error = new Error("Invalid password");
+    const error = new Error("Invalid credentials");
     error.statusCode = 401;
     throw error;
   }
@@ -55,7 +55,24 @@ const loginUser = async function (userData) {
   return token;
 };
 
+const authenticateUser = async function (userData) {
+  const user = await User.findOne(
+    { where: { email: userData.email } },
+    {
+      attributes: ["id", "username", "email", "phoneNumber"],
+    },
+  );
+  if (!user) {
+    const error = new Error("User not found");
+    error.statusCode = 401;
+    throw error;
+  }
+
+  return user;
+};
+
 module.exports = {
   signupUser,
   loginUser,
+  authenticateUser,
 };

@@ -1,8 +1,8 @@
-const { Messages } = require("../models/index");
+const { Message } = require("../models/index");
 
 const addMessage = async function (userId, message) {
   console.log("inside message");
-  const newMessage = await Messages.create({
+  const newMessage = await Message.create({
     senderId: userId,
     message,
   });
@@ -12,7 +12,7 @@ const addMessage = async function (userId, message) {
 };
 
 const fetchMessage = async function (userId) {
-  const messages = await Messages.findAll({
+  const messages = await Message.findAll({
     where: {
       senderId: userId,
     },

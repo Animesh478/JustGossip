@@ -13,6 +13,11 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "senderId",
         as: "messages",
       });
+
+      User.belongsTo(models.Chat, {
+        through: models.ChatParticipants,
+        foreignKey: "userId",
+      });
     }
   }
   User.init(

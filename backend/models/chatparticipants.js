@@ -1,7 +1,7 @@
 "use strict";
 const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
-  class Message extends Model {
+  class ChatParticipants extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -9,48 +9,36 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      Message.belongsTo(models.User, {
-        foreignKey: "senderId",
-        as: "sender",
-        onDelete: "CASCADE", // alias for this relationship
-        onUpdate: "CASCADE", // alias for this relationship
-      });
+      // a participant record belongs to one specific chat
+      ChatParticipants.belongsTo(models.Chat, { foreignKey: "chatId" });
 
-      Message.belongsTo(models.Chat, {
-        foreignKey: "chatId",
-        as: "chat",
-        onDelete: "CASCADE",
-        onUpdate: "CASCADE",
-      });
+      // a participant record belongs to one specific user
+      ChatParticipants.belongsTo(models.User, { foreignKey: "userId" });
     }
   }
-  Message.init(
+  ChatParticipants.init(
     {
       id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
+        allowNull: false,
         autoIncrement: true,
-        allowNull: false,
-      },
-      message: {
-        type: DataTypes.TEXT,
-        allowNull: false,
-      },
-      senderId: {
-        type: DataTypes.UUID,
-        allowNull: false,
-        field: "sender_id",
       },
       chatId: {
         type: DataTypes.INTEGER,
         allowNull: false,
         field: "chat_id",
       },
+      userId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        field: "user_id",
+      },
     },
     {
       sequelize,
-      modelName: "Message",
-      tableName: "messages",
+      modelName: "ChatParticipants",
+      tableName: "chat_participants",
       freezeTableName: true,
       underscored: true,
       timestamps: true,
@@ -58,5 +46,5 @@ module.exports = (sequelize, DataTypes) => {
       updatedAt: "updated_at",
     },
   );
-  return Message;
+  return ChatParticipants;
 };

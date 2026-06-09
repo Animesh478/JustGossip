@@ -34,6 +34,7 @@ const login = async function (req, res) {
     });
     res.status(200).json({ message: "Login successful" });
   } catch (error) {
+    console.error("login error-", error);
     const errorStatusCode = error.statusCode || 500;
     res.status(errorStatusCode).json({ error: error.message });
   }

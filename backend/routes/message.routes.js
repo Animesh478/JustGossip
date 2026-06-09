@@ -8,7 +8,7 @@ const {
 const messageRouter = express.Router();
 
 messageRouter
-  .route("/messages")
+  .route("/")
   .post(authMiddleware, sendMessage)
   .get(authMiddleware, getMessage);
 

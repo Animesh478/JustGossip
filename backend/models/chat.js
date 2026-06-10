@@ -9,9 +9,11 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      Chat.belongsTo(models.User, {
+      Chat.belongsToMany(models.User, {
         through: models.ChatParticipants,
         foreignKey: "chatId",
+        otherKey: "userId",
+        as: "participants",
       });
     }
   }
@@ -25,6 +27,8 @@ module.exports = (sequelize, DataTypes) => {
       },
       isGroup: {
         type: DataTypes.BOOLEAN,
+        defaultValue: false,
+        allowNull: false,
       },
       name: {
         type: DataTypes.STRING,

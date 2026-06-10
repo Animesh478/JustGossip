@@ -8,7 +8,7 @@ const accessOrCreateChat = async function (req, res) {
     return res.status(400).json({ message: "Missing user IDs" });
 
   const data = await accessOrCreateChatService(senderId, targetUserId);
-  return data;
+  return res.status(200).json({ data });
 
   try {
   } catch (error) {

@@ -1,31 +1,43 @@
 import { useState } from "react";
-import { fetchUser } from "../api/user";
+import { fetchTargetUser } from "../api/user";
 import { accessOrCreateChat } from "../api/chat";
 
-function Sidebar({ onSelectUser }) {
+function Sidebar({ onSelectChat, chats }) {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [searchResult, setSearchResult] = useState(null);
   const [showModal, setShowModal] = useState(true); // for the contact modal
 
+  // fetching the receiver data with phone number
   const handleFetchTargetUser = async function (e) {
     e.preventDefault();
 
     if (!phoneNumber.trim()) return;
 
-    const data = await fetchUser(phoneNumber);
+    const userData = await fetchTargetUser(phoneNumber);
     // data = {id: "", username: "", phoneNumber: "+91"}
     setShowModal(true);
-    setSearchResult(data);
+    setSearchResult(userData);
   };
 
-  const handleSelectUser = async function () {
+  const handleModalClick = async function () {
     try {
+      console.log("search result = ", searchResult);
       // send the target user's ID to the backend to get/create the chat
       const chatData = await accessOrCreateChat(searchResult.id);
-      console.log("chat data=", chatData);
-      onSelectUser(chatData);
+      console.log("chat data sidebar=", chatData);
+      onSelectChat(chatData);
       setPhoneNumber("");
       setShowModal(false);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleChatClick = async function (targetUserId) {
+    try {
+      const chatData = await accessOrCreateChat(targetUserId);
+      console.log("chat data on click chat=", chatData);
+      onSelectChat(chatData);
     } catch (error) {
       console.log(error);
     }
@@ -55,6 +67,7 @@ function Sidebar({ onSelectUser }) {
           />
         </svg>
 
+        {/* Search Form */}
         <form className="w-full flex" onSubmit={handleFetchTargetUser}>
           <input
             type="text"
@@ -75,7 +88,7 @@ function Sidebar({ onSelectUser }) {
       {/* Search Result */}
       {searchResult && showModal && (
         <div
-          onClick={handleSelectUser}
+          onClick={handleModalClick}
           className="rounded-lg shadow-md shadow-primary cursor-pointer px-3 flex"
         >
           <div>
@@ -92,11 +105,13 @@ function Sidebar({ onSelectUser }) {
 
       {/* Chat list */}
       <ul>
-        {[1, 2, 3, 4].map((chat) => {
+        {/* chat: {chatId, receiver, senderId, lastMessage, updatedMessage} */}
+        {chats.map((chat) => {
           return (
             <li
-              key={chat}
+              key={chat.chatId}
               className="flex hover:bg-primary-light hover:rounded-xl cursor-pointer px-3 py-2"
+              onClick={() => handleChatClick(chat.receiver.id)}
             >
               <div className="flex items-center gap-2">
                 <div>
@@ -119,10 +134,10 @@ function Sidebar({ onSelectUser }) {
                 </div>
                 <div>
                   <h3 className="font-semibold font-poppins text-primary">
-                    Jon Doe
+                    {chat.receiver.username}
                   </h3>
                   <p className="font-roboto text-sm text-secondary">
-                    Last message ...
+                    {chat.lastMessage}
                   </p>
                 </div>
               </div>

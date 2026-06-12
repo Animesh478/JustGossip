@@ -11,10 +11,10 @@ const addMessage = async function (userId, message) {
   return newMessage;
 };
 
-const fetchMessage = async function (userId) {
+const fetchMessage = async function (chatId) {
   const messages = await Message.findAll({
     where: {
-      senderId: userId,
+      chatId,
     },
     order: [["created_at", "ASC"]],
   });

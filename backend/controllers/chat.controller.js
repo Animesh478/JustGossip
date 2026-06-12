@@ -1,4 +1,19 @@
-const { accessOrCreateChatService } = require("../services/chat.service");
+const {
+  accessOrCreateChatService,
+  getAllChats,
+} = require("../services/chat.service");
+
+// when frontend hits the /api/chats/getAllChats route
+const fetchAllChats = async function (req, res) {
+  try {
+    const currentUserId = req.user.id;
+    const formattedChats = await getAllChats(currentUserId);
+    return res.status(200).json(formattedChats);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Failed to fetch chats" });
+  }
+};
 
 const accessOrCreateChat = async function (req, res) {
   const senderId = req.user.id;
@@ -8,7 +23,7 @@ const accessOrCreateChat = async function (req, res) {
     return res.status(400).json({ message: "Missing user IDs" });
 
   const data = await accessOrCreateChatService(senderId, targetUserId);
-  return res.status(200).json({ data });
+  return res.status(200).json(data);
 
   try {
   } catch (error) {
@@ -19,4 +34,5 @@ const accessOrCreateChat = async function (req, res) {
 
 module.exports = {
   accessOrCreateChat,
+  fetchAllChats,
 };

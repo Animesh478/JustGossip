@@ -1,30 +1,12 @@
-import { useEffect } from "react";
-import { useState } from "react";
-import apiClient from "../api/axios";
 import { Navigate, Outlet } from "react-router-dom";
+import { useAuth } from "./AuthContext";
 
 function ProtectedRoute() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  useEffect(() => {
-    const authenticateUser = async function () {
-      try {
-        await apiClient.get("/user-auth/me");
-        setIsAuthenticated(true);
-      } catch (error) {
-        setIsAuthenticated(false);
-        console.log(error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    authenticateUser();
-  }, []);
+  const { currentUser, isLoading } = useAuth();
 
   if (isLoading) return <div>Loading chats...</div>;
 
-  if (!isAuthenticated) {
+  if (!currentUser) {
     return <Navigate to="/login" replace />;
   }
 

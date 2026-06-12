@@ -39,12 +39,10 @@ module.exports = (sequelize, DataTypes) => {
       senderId: {
         type: DataTypes.UUID,
         allowNull: false,
-        field: "sender_id",
       },
       chatId: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        field: "chat_id",
       },
     },
     {
@@ -54,8 +52,6 @@ module.exports = (sequelize, DataTypes) => {
       freezeTableName: true,
       underscored: true,
       timestamps: true,
-      createdAt: "created_at",
-      updatedAt: "updated_at",
     },
   );
   return Message;

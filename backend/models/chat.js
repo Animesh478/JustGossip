@@ -15,6 +15,12 @@ module.exports = (sequelize, DataTypes) => {
         otherKey: "userId",
         as: "participants",
       });
+
+      Chat.hasMany(models.Message, {
+        foreignKey: "chatId",
+        as: "messages",
+        onDelete: "CASCADE",
+      });
     }
   }
   Chat.init(

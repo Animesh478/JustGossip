@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import io from "socket.io-client";
 
-import { getMessage, sendMessage } from "../api/message";
+import { fetchMessagesForChat, sendMessage } from "../api/message";
 import ChatHeader from "./ChatHeader";
 import MessageInput from "./MessageInput";
 import Messages from "./Messages";
+import { createSocketConnection } from "../../utils/socket";
 
-const socket = io("http://localhost:8000");
+const socket = createSocketConnection();
 
 function ChatWindow({ activeChat }) {
   const [messages, setMessages] = useState([]);
@@ -15,12 +15,12 @@ function ChatWindow({ activeChat }) {
   useEffect(() => {
     if (activeChat) {
       // 1. Join the specific chat room using the chat id
-      socket.emit("join_chat", activeChat.id);
+      socket.emit("join_chat", activeChat.chatId);
 
       // 2. Fetch the historical messages for this specific chat from the db
       const fetchHistoricalMessages = async function () {
         try {
-          const data = await getMessage(activeChat.id);
+          const data = await fetchMessagesForChat(activeChat.chatId);
           console.log("messages=", data);
         } catch (error) {
           console.log(error);
@@ -43,18 +43,18 @@ function ChatWindow({ activeChat }) {
     }
   };
 
-  useEffect(() => {
-    const fetchMessages = async function () {
-      try {
-        const data = await getMessage();
-        setMessages(data);
-      } catch (error) {
-        console.error(error);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchMessages = async function () {
+  //     try {
+  //       const data = await getMessage();
+  //       setMessages(data);
+  //     } catch (error) {
+  //       console.error(error);
+  //     }
+  //   };
 
-    fetchMessages();
-  }, []);
+  //   fetchMessages();
+  // }, []);
 
   if (!activeChat) {
     return (

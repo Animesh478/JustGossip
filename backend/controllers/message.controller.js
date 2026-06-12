@@ -19,11 +19,12 @@ const sendMessage = async function (req, res) {
 };
 
 const getMessage = async function (req, res) {
-  const userDetails = req.user;
-  const userId = userDetails.id;
+  // const userDetails = req.user;
+  // const userId = userDetails.id;
+  const chatId = req.params.chatId;
 
   try {
-    const messages = await fetchMessage(userId);
+    const messages = await fetchMessage(chatId);
     res.status(200).json({ messages });
   } catch (error) {
     console.log(error);

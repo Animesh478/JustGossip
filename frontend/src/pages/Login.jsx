@@ -11,6 +11,7 @@ function Login() {
     };
     try {
       await apiClient.post("/user-auth/login", userCredentials);
+      console.log("user logged in");
       navigate("/chat");
     } catch (error) {
       console.log("Error:", error);

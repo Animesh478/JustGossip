@@ -1,10 +1,11 @@
 const { Message } = require("../models/index");
 
-const addMessage = async function (userId, message) {
+const addMessage = async function (userId, message, chatId) {
   console.log("inside message");
   const newMessage = await Message.create({
     senderId: userId,
     message,
+    chatId,
   });
   if (!newMessage) throw new Error("cannot add message");
 

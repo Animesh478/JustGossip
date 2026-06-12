@@ -29,7 +29,7 @@ const getAllChats = async function (currentUserId) {
             [Op.ne]: currentUserId, // get the user who is not the current user
           },
         },
-        attributes: ["id", "username", "phoneNumber"],
+        attributes: ["id", "username", "phoneNumber", "profilePictureUrl"],
       },
 
       // {
@@ -88,20 +88,21 @@ const accessOrCreateChatService = async function (senderId, targetUserId) {
         },
       },
     });
-    console.log("shared participant=", sharedChatParticipant);
+    // console.log("shared participant=", sharedChatParticipant);
 
     // Helper function to format the response for the frontend
     const formatForFrontend = (chatObj) => {
-      console.log("chat obj=", chatObj);
+      // console.log("chat obj=", chatObj);
       // Find the participant who is NOT the sender
       const targetUser = chatObj.participants.find((p) => p.id !== senderId);
-      console.log("receiver=", targetUser);
+      // console.log("receiver=", targetUser);
       return {
         chatId: chatObj.id,
         receiver: {
           id: targetUser.id,
           username: targetUser.username,
           phoneNumber: targetUser.phoneNumber,
+          profilePictureUrl: targetUser.profilePictureUrl,
         },
         sender: chatObj.messages?.[0]?.senderId || null,
         lastMessage:
@@ -121,7 +122,7 @@ const accessOrCreateChatService = async function (senderId, targetUserId) {
           {
             model: User,
             as: "participants",
-            attributes: ["id", "username", "phoneNumber"],
+            attributes: ["id", "username", "phoneNumber", "profilePictureUrl"],
           },
           {
             model: Message,
@@ -132,7 +133,7 @@ const accessOrCreateChatService = async function (senderId, targetUserId) {
         ],
       });
       const formattedChat = formatForFrontend(existingChat);
-      console.log("existing chat=", formattedChat);
+      // console.log("existing chat=", formattedChat);
 
       return formattedChat;
     }
@@ -156,7 +157,7 @@ const accessOrCreateChatService = async function (senderId, targetUserId) {
         {
           model: User,
           as: "participants",
-          attributes: ["id", "username", "phoneNumber"],
+          attributes: ["id", "username", "phoneNumber", "profilePictureUrl"],
         },
         {
           model: Message,

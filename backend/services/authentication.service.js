@@ -33,6 +33,7 @@ const loginUser = async function (userData) {
   const { email, password } = userData;
 
   const existingUserInstance = await User.findOne({ where: { email } });
+  // console.log("existing user=", existingUserInstance);
   if (!existingUserInstance) {
     const error = new Error("Invalid credentials");
     error.statusCode = 401;
@@ -56,12 +57,11 @@ const loginUser = async function (userData) {
 };
 
 const authenticateUser = async function (userData) {
-  const user = await User.findOne(
-    { where: { email: userData.email } },
-    {
-      attributes: ["id", "username", "email", "phoneNumber"],
-    },
-  );
+  const user = await User.findOne({
+    where: { email: userData.email },
+    attributes: ["id", "username", "email", "phoneNumber", "profilePictureUrl"],
+  });
+  // console.log("user data=", user);
   if (!user) {
     const error = new Error("User not found");
     error.statusCode = 401;

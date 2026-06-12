@@ -48,8 +48,6 @@ module.exports = (sequelize, DataTypes) => {
       freezeTableName: true,
       underscored: true,
       timestamps: true,
-      createdAt: "created_at",
-      updatedAt: "updated_at",
     },
   );
   return Chat;

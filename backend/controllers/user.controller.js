@@ -5,7 +5,7 @@ const searchUser = async function (req, res) {
   try {
     const { phoneNumber } = req.body;
     const user = await fetchUser(phoneNumber);
-    console.log(user);
+    // console.log(user);
     if (user.id === req.user.id) {
       return res.status(400).json({ error: "You cannot chat with yourself" });
     }

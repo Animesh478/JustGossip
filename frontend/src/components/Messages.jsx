@@ -1,4 +1,5 @@
 function Messages({ messages }) {
+  // console.log("messages messages.jsx=", messages);
   return (
     <main className="flex-1 px-4 py-3 overflow-y-auto ">
       {messages.map((message) => {

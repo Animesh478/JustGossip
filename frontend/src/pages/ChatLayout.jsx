@@ -2,13 +2,11 @@ import { useEffect, useState } from "react";
 import ChatWindow from "../components/ChatWindow";
 import Sidebar from "../components/Sidebar";
 import { fetchChatHistory } from "../api/chat";
-// import { fetchMessagesForChat } from "../api/message";
 
 function ChatLayout() {
   const [activeChat, setActiveChat] = useState(null);
   const [chats, setChats] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  // const [messages, setMessages] = useState([]);
 
   // fetch initial sidebar chats on load
   useEffect(() => {
@@ -43,14 +41,6 @@ function ChatLayout() {
 
     // 3. Open the chat window
     setActiveChat(chatData);
-
-    // 4. fetch chat history for this specific chat
-    // try {
-    //   const chatHistory = await fetchMessagesForChat(chatData.chatId);
-    //   setMessages(chatHistory);
-    // } catch (error) {
-    //   console.log("Failed to load chat history", error);
-    // }
   };
 
   if (isLoading) {

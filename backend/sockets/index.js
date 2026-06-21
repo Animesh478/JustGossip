@@ -10,6 +10,8 @@ const initializeSocket = function (server) {
 
   io.on("connection", (socket) => {
     console.log(`⚡ New Connection! Socket ID: ${socket.id}`);
+
+    // ---JOIN CHAT ROOM---
     socket.on("join_chat", ({ chatId }) => {
       // console.log(chat);
       const roomId = `room_${chatId}`;
@@ -17,8 +19,8 @@ const initializeSocket = function (server) {
       console.log(`✅ Socket ${socket.id} joined ${roomId}`);
     });
 
+    // ---SEND MESSAGE---
     //? here we are listening for the send_message event. this event gets triggered when the user sends a message
-    //todo: now i have to send this message to the intended receiver
     socket.on("send_message", (newMessage) => {
       // newMessage = {id, chatId, message, senderId, createdAt, updatedAt}
       // console.log("send message=", newMessage);

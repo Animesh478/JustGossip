@@ -34,12 +34,18 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         field: "user_id",
       },
+      isAdmin: {
+        // important for group chat
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+        allowNull: false,
+        field: "is_admin",
+      },
     },
     {
       sequelize,
       modelName: "ChatParticipants",
       tableName: "chat_participants",
-      freezeTableName: true,
       underscored: true,
       timestamps: true,
     },

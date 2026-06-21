@@ -24,7 +24,7 @@ const login = async function (req, res) {
   const userCredentials = req.body;
   console.log(userCredentials);
   try {
-    const token = await loginUser(userCredentials);
+    const { token, user } = await loginUser(userCredentials);
     res.cookie("access_token", token, {
       httpOnly: true,
       secure: false,
@@ -32,7 +32,7 @@ const login = async function (req, res) {
       path: "/",
       maxAge: 24 * 60 * 60 * 1000,
     });
-    res.status(200).json({ message: "Login successful" });
+    res.status(200).json(user);
   } catch (error) {
     console.error("login error-", error);
     const errorStatusCode = error.statusCode || 500;
@@ -45,7 +45,7 @@ const authenticate = async function (req, res) {
 
   try {
     const user = await authenticateUser(userData);
-    return res.status(200).json({ data: user });
+    return res.status(200).json(user);
   } catch (error) {
     const errorStatusCode = error.statusCode || 500;
     return res.status(errorStatusCode).json({ error: error.message });

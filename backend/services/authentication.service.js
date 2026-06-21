@@ -32,7 +32,9 @@ const signupUser = async function (userData) {
 const loginUser = async function (userData) {
   const { email, password } = userData;
 
-  const existingUserInstance = await User.findOne({ where: { email } });
+  const existingUserInstance = await User.findOne({
+    where: { email },
+  });
   // console.log("existing user=", existingUserInstance);
   if (!existingUserInstance) {
     const error = new Error("Invalid credentials");
@@ -53,7 +55,17 @@ const loginUser = async function (userData) {
   }
 
   const token = createJWT(existingUser);
-  return token;
+  const user = await User.findOne({
+    where: {
+      email,
+    },
+    attributes: ["id", "username", "email", "phoneNumber", "profilePictureUrl"],
+  });
+  const data = {
+    token,
+    user,
+  };
+  return data;
 };
 
 const authenticateUser = async function (userData) {

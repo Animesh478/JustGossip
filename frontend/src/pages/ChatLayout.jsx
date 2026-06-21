@@ -1,19 +1,21 @@
 import { useEffect, useState } from "react";
+
 import ChatWindow from "../components/ChatWindow";
 import Sidebar from "../components/Sidebar";
 import { fetchChatHistory } from "../api/chat";
+import GroupChat from "../components/GroupChat";
 
 function ChatLayout() {
   const [activeChat, setActiveChat] = useState(null);
   const [chats, setChats] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showGroupChatModal, setShowGroupChatModal] = useState(false);
 
   // fetch initial sidebar chats on load
   useEffect(() => {
     const loadInitialChats = async function () {
       try {
         const chatData = await fetchChatHistory();
-        // console.log("chatsss=", chatData);
         setChats(chatData);
       } catch (error) {
         console.error(error);
@@ -49,7 +51,14 @@ function ChatLayout() {
 
   return (
     <div className="flex w-full h-screen">
-      <Sidebar onSelectChat={handleSelectChat} chats={chats} />
+      <Sidebar
+        onSelectChat={handleSelectChat}
+        chats={chats}
+        onSelectGroupChat={setShowGroupChatModal}
+      />
+      {showGroupChatModal && (
+        <GroupChat onSelectGroupChat={setShowGroupChatModal} />
+      )}
       <ChatWindow activeChat={activeChat} />
     </div>
   );

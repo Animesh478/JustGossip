@@ -10,8 +10,8 @@ export const AuthProvider = ({ children }) => {
     const authenticateUser = async function () {
       try {
         const res = await fetchCurrentUser();
-        console.log("user auth=", res.data.data);
-        const userData = res.data.data;
+        // console.log("user auth=", res?.data);
+        const userData = res?.data;
         setCurrentUser(userData);
       } catch (error) {
         console.error("Authentication failed.", error);

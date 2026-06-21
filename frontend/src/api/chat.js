@@ -22,3 +22,15 @@ export const accessOrCreateChat = async function (targetUserId) {
     throw error;
   }
 };
+
+export const createGroupChat = async function (groupName, memberIds) {
+  try {
+    await apiClient.post("/chats/groupChat", {
+      groupName,
+      memberIds,
+    });
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};

@@ -1,17 +1,11 @@
 import { useState } from "react";
 import { fetchTargetUser } from "../api/user";
 import { accessOrCreateChat } from "../api/chat";
-// import { useAuth } from "./AuthContext";
 
-function Sidebar({ onSelectChat, chats }) {
-  // const userAuth = useAuth();
-  // console.log("user auth sidebar", userAuth);
-  // const currentUser = userAuth.currentUser;
+function Sidebar({ onSelectChat, chats, onSelectGroupChat }) {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [searchResult, setSearchResult] = useState(null); // what we search in the search bar
   const [showModal, setShowModal] = useState(true); // for the contact modal
-
-  // console.log("chats sidebar=", chats);
 
   // fetching the receiver data with phone number
   const handleFetchTargetUser = async function (e) {
@@ -27,10 +21,8 @@ function Sidebar({ onSelectChat, chats }) {
 
   const handleModalClick = async function () {
     try {
-      // console.log("search result = ", searchResult);
       // send the target user's ID to the backend to get/create the chat
       const chatData = await accessOrCreateChat(searchResult.id);
-      // console.log("chat data sidebar=", chatData);
       onSelectChat(chatData);
       setPhoneNumber("");
       setShowModal(false);
@@ -42,7 +34,6 @@ function Sidebar({ onSelectChat, chats }) {
   const handleChatClick = async function (targetUserId) {
     try {
       const chatData = await accessOrCreateChat(targetUserId);
-      // console.log("chat data on click chat=", chatData);
       onSelectChat(chatData);
     } catch (error) {
       console.log(error);
@@ -89,6 +80,16 @@ function Sidebar({ onSelectChat, chats }) {
             Search
           </button>
         </form>
+      </div>
+
+      {/* Create group button */}
+      <div>
+        <button
+          className="border-primary border rounded-md w-full bg-primary text-white font-poppins cursor-pointer py-1 hover:bg-secondary hover:text-white"
+          onClick={() => onSelectGroupChat(true)}
+        >
+          Create Group
+        </button>
       </div>
 
       {/* Search Result */}

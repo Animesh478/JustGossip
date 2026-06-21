@@ -10,7 +10,7 @@ import { createSocketConnection } from "../../utils/socket";
 function ChatWindow({ activeChat }) {
   // const userAuth = useAuth();
   const [messages, setMessages] = useState([]);
-  console.log("chat window messages=", messages);
+  // console.log("chat window messages=", messages);
 
   // use this ref to hold the socket, so we can access it outside the useEffect
   const socketRef = useRef();

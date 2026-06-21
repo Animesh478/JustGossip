@@ -1,17 +1,25 @@
 import { useNavigate } from "react-router-dom";
 import apiClient from "../api/axios";
+import { useContext } from "react";
+import { AuthContext } from "../components/AuthContext";
 
 function Login() {
   const navigate = useNavigate();
-  const handleLogin = async function (formData) {
+  const { setCurrentUser } = useContext(AuthContext);
+
+  const handleLogin = async function (e) {
+    e.preventDefault();
+
+    const formData = new FormData(e.currentTarget);
     const userCredentials = {
       email: formData.get("email"),
       password: formData.get("password"),
       phoneNumber: formData.get("phone"),
     };
     try {
-      await apiClient.post("/user-auth/login", userCredentials);
-      console.log("user logged in");
+      const res = await apiClient.post("/user-auth/login", userCredentials);
+      // console.log("user logged in=", res.data);
+      setCurrentUser(res?.data);
       navigate("/chat");
     } catch (error) {
       console.log("Error:", error);
@@ -21,7 +29,10 @@ function Login() {
     <div className="bg-primary-light h-screen flex  items-center justify-center">
       <div className="flex flex-col gap-8 items-center justify-between bg-stone-100 border-2 border-primary rounded-lg px-4 py-6 font-poppins md:w-1/3">
         <h1 className="font-semibold text-4xl text-primary">JustGossip</h1>
-        <form className="flex flex-col gap-3 w-full py-4" action={handleLogin}>
+        <form
+          className="flex flex-col gap-3 w-full py-4"
+          onSubmit={handleLogin}
+        >
           <div className="flex gap-2 items-center justify-between">
             <label htmlFor="" className=" text-xl">
               Email

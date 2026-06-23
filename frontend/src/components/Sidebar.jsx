@@ -2,7 +2,8 @@ import { useState } from "react";
 import { fetchTargetUser } from "../api/user";
 import { accessOrCreateChat } from "../api/chat";
 
-function Sidebar({ onSelectChat, chats, onSelectGroupChat }) {
+function Sidebar({ onSelectChat, chats, onSelectGroupChatModal }) {
+  console.log("sidebar component is rendered");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [searchResult, setSearchResult] = useState(null); // what we search in the search bar
   const [showModal, setShowModal] = useState(true); // for the contact modal
@@ -23,6 +24,7 @@ function Sidebar({ onSelectChat, chats, onSelectGroupChat }) {
     try {
       // send the target user's ID to the backend to get/create the chat
       const chatData = await accessOrCreateChat(searchResult.id);
+      console.log("sidebar.jsx, contact modal clicked");
       onSelectChat(chatData);
       setPhoneNumber("");
       setShowModal(false);
@@ -31,13 +33,21 @@ function Sidebar({ onSelectChat, chats, onSelectGroupChat }) {
     }
   };
 
+  // when one clicks on a chat
   const handleChatClick = async function (targetUserId) {
     try {
       const chatData = await accessOrCreateChat(targetUserId);
+      // console.log("sidebar.jsx, chatData= ", chatData);
       onSelectChat(chatData);
     } catch (error) {
       console.log(error);
     }
+  };
+
+  const handleGroupChatClick = async function (groupChatData) {
+    // console.log("sidebar.jsx, groupChatData= ", groupChatData);
+    // groupChatData = {chatId, isGroup, chatName, participants:[], receiver:null, senderId, updatedAt }
+    onSelectChat(groupChatData);
   };
 
   return (
@@ -86,7 +96,7 @@ function Sidebar({ onSelectChat, chats, onSelectGroupChat }) {
       <div>
         <button
           className="border-primary border rounded-md w-full bg-primary text-white font-poppins cursor-pointer py-1 hover:bg-secondary hover:text-white"
-          onClick={() => onSelectGroupChat(true)}
+          onClick={() => onSelectGroupChatModal(true)}
         >
           Create Group
         </button>
@@ -114,15 +124,20 @@ function Sidebar({ onSelectChat, chats, onSelectGroupChat }) {
       <ul>
         {/* chat: {chatId, receiver, senderId, lastMessage, updatedMessage} */}
         {chats.map((chat) => {
+          console.log("sidebar.jsx, chat=", chat);
           return (
             <li
               key={chat.chatId}
               className="flex hover:bg-primary-light hover:rounded-xl cursor-pointer px-3 py-2"
-              onClick={() => handleChatClick(chat.receiver.id)}
+              onClick={
+                chat.isGroup
+                  ? () => handleGroupChatClick(chat)
+                  : () => handleChatClick(chat.receiver?.id)
+              }
             >
               <div className="flex items-center gap-2">
                 <div>
-                  {chat.receiver.profilePictureUrl ? (
+                  {!chat.isGroup && chat.receiver.profilePictureUrl ? (
                     <img src="" alt="" />
                   ) : (
                     <svg
@@ -143,7 +158,7 @@ function Sidebar({ onSelectChat, chats, onSelectGroupChat }) {
                 </div>
                 <div>
                   <h3 className="font-semibold font-poppins text-primary">
-                    {chat.receiver.username}
+                    {chat.isGroup ? chat.chatName : chat.receiver?.username}
                   </h3>
                   <p className="font-roboto text-sm text-secondary">
                     {chat.lastMessage}

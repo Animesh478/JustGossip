@@ -12,6 +12,8 @@ function ChatWindow({ activeChat }) {
   const [messages, setMessages] = useState([]);
   // console.log("chat window messages=", messages);
 
+  // console.log("chatWindow.jsx, active chat = ", activeChat);
+
   // use this ref to hold the socket, so we can access it outside the useEffect
   const socketRef = useRef();
 

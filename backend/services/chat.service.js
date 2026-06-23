@@ -1,5 +1,11 @@
 const { Op } = require("sequelize");
-const { ChatParticipants, Chat, User, Message } = require("../models");
+const {
+  ChatParticipants,
+  Chat,
+  User,
+  Message,
+  sequelize,
+} = require("../models");
 
 // this function runs when we initially fetch all the chats
 const getAllChats = async function (currentUserId) {
@@ -24,14 +30,13 @@ const getAllChats = async function (currentUserId) {
       {
         model: User,
         as: "participants",
-        where: {
-          id: {
-            [Op.ne]: currentUserId, // get the user who is not the current user
-          },
-        },
+        // where: {
+        //   id: {
+        //     [Op.ne]: currentUserId, // get the user who is not the current user
+        //   },
+        // },
         attributes: ["id", "username", "phoneNumber", "profilePictureUrl"],
       },
-
       // {
       //   model: Message,
       //   as: "messages",
@@ -40,21 +45,42 @@ const getAllChats = async function (currentUserId) {
       // },
     ],
   });
-  // console.log("get all chats = ", chats);
 
   // format the data that needs to be send to the frontend
   const formattedChats = await Promise.all(
     chats.map(async (chat) => {
-      // console.log("chat id=", chat.id);
       const latestMessage = await Message.findOne({
         where: { chatId: chat.id },
-        order: [["createdAt", "DESC"]],
+        order: [["updatedAt", "DESC"]],
       });
-      // console.log("latest message=", latestMessage);
+
+      console.log("chat.service, chats = ", chats);
+      // const receiver =
+      let chatDetails = {};
+
+      if (chat.isGroup) {
+        chatDetails = {
+          isGroup: true,
+          chatName: chat.name,
+          participants: chat.participants,
+          receiver: null,
+        };
+      } else {
+        chatDetails = {
+          isGroup: false,
+          chatName: null,
+          participants: chat.participants,
+          receiver: chat.participants.filter(
+            (participant) => participant.id !== currentUserId,
+          )[0],
+        };
+      }
+
       return {
         chatId: chat.id,
-        receiver: chat.participants[0],
-        senderId: latestMessage?.senderId || null,
+        ...chatDetails,
+        // senderId: latestMessage?.senderId || null,
+        senderId: currentUserId,
         lastMessage: latestMessage?.message || "Start a conversation",
         updatedAt: latestMessage?.updatedAt || chat.createdAt,
       };
@@ -79,12 +105,25 @@ const accessOrCreateChatService = async function (senderId, targetUserId) {
     const chatIds = senderChats.map((chat) => chat.chatId);
     // console.log("chat ids=", chatIds);
 
-    // 3- check if the target user is already in any of these chats
+    // find all the chats that are personal (exclude all the group chats)
+    const personalChats = await Chat.findAll({
+      where: {
+        id: {
+          [Op.in]: chatIds,
+        },
+        isGroup: false,
+      },
+    });
+
+    const personalChatIds = personalChats.map((chat) => chat.id);
+    console.log("PERSONAL CHAT IDS = ", personalChatIds);
+
+    // 3- check if the target user is already in any of the personal chats
     const sharedChatParticipant = await ChatParticipants.findOne({
       where: {
         userId: targetUserId,
         chatId: {
-          [Op.in]: chatIds,
+          [Op.in]: personalChatIds,
         },
       },
     });
@@ -92,19 +131,19 @@ const accessOrCreateChatService = async function (senderId, targetUserId) {
 
     // Helper function to format the response for the frontend
     const formatForFrontend = (chatObj) => {
-      // console.log("chat obj=", chatObj);
       // Find the participant who is NOT the sender
       const targetUser = chatObj.participants.find((p) => p.id !== senderId);
-      // console.log("receiver=", targetUser);
       return {
         chatId: chatObj.id,
+        isGroup: chatObj.isGroup,
         receiver: {
           id: targetUser.id,
           username: targetUser.username,
           phoneNumber: targetUser.phoneNumber,
           profilePictureUrl: targetUser.profilePictureUrl,
         },
-        sender: chatObj.messages?.[0]?.senderId || null,
+        // sender: chatObj.messages?.[0]?.senderId || null,
+        sender: senderId,
         lastMessage:
           chatObj.messages?.[0]?.message || "Start a conversation...",
         updatedAt: chatObj.messages?.[0]?.updatedAt || chatObj.createdAt,
@@ -132,20 +171,17 @@ const accessOrCreateChatService = async function (senderId, targetUserId) {
           },
         ],
       });
+
+      console.log("chat.service.js, existingChat=", existingChat);
       const formattedChat = formatForFrontend(existingChat);
-      // console.log("existing chat=", formattedChat);
 
       return formattedChat;
     }
 
     // 5- If there is no existing chat between the sender and the target, create a new one in the database
     const newChat = await Chat.create();
-
+    console.log("chat.service.js, newChat = ", newChat);
     // 6- Add both users to the chat participants table
-    // await ChatParticipants.bulkCreate([
-    //   { chatId: newChat.id, userId: senderId },
-    //   { chatId: newChat.id, userId: targetUserId },
-    // ]);
     await newChat.addParticipants([senderId, targetUserId]);
 
     // 7- fetch the newly created chat with the associated user data
@@ -165,7 +201,7 @@ const accessOrCreateChatService = async function (senderId, targetUserId) {
         },
       ],
     });
-    // console.log("new chat=", completeNewChat);
+
     return formatForFrontend(completeNewChat);
   } catch (error) {
     console.log(error);
@@ -173,7 +209,69 @@ const accessOrCreateChatService = async function (senderId, targetUserId) {
   }
 };
 
+const createGroupChatService = async function (
+  participants,
+  groupName,
+  currentUser,
+) {
+  try {
+    const newGroupChat = await sequelize.transaction(async (t) => {
+      // create a chat record
+      const chat = await Chat.create(
+        {
+          isGroup: true,
+          name: groupName,
+        },
+        {
+          transaction: t,
+        },
+      );
+
+      // create the chat participants records
+      const participantsToInsert = participants.map((id) => {
+        return {
+          chatId: chat.id,
+          userId: id,
+          isAdmin: id === currentUser,
+        };
+      });
+      // participantsToInsert = [{chatId, userId, isAdmin}]
+
+      await ChatParticipants.bulkCreate(participantsToInsert, {
+        transaction: t,
+      });
+
+      return chat;
+    });
+
+    const fullGroupChat = await Chat.findOne({
+      where: {
+        id: newGroupChat.id,
+      },
+      attributes: [
+        ["id", "chatId"],
+        ["name", "chatName"],
+        "isGroup",
+        "createdAt",
+        "updatedAt",
+      ],
+      include: [
+        {
+          model: User,
+          as: "participants",
+          attributes: ["id", "username", "phoneNumber", "profilePictureUrl"],
+        },
+      ],
+    });
+
+    return fullGroupChat;
+  } catch (error) {
+    throw error;
+  }
+};
+
 module.exports = {
   accessOrCreateChatService,
   getAllChats,
+  createGroupChatService,
 };

@@ -1,10 +1,11 @@
 function ChatHeader({ activeChat }) {
-  console.log("active chat obj chat header=", activeChat);
-  const targetUser = activeChat.receiver;
+  // console.log("active chat obj chat header=", activeChat);
+
+  const targetUser = activeChat.isGroup ? null : activeChat.receiver;
   return (
     <header className="bg-primary text-white px-4 py-2">
       <div className="flex items-center gap-2">
-        {targetUser.profilePictureUrl ? (
+        {targetUser?.profilePictureUrl ? (
           <img src="" alt="" />
         ) : (
           <svg
@@ -24,7 +25,9 @@ function ChatHeader({ activeChat }) {
         )}
 
         <h2 className="font-semibold text-lg font-poppins">
-          {activeChat.receiver.username}
+          {activeChat.isGroup
+            ? activeChat.chatName
+            : activeChat.receiver?.username}
         </h2>
       </div>
     </header>

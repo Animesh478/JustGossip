@@ -3,7 +3,7 @@ import { useState } from "react";
 import { fetchTargetUser } from "../api/user";
 import { createGroupChat } from "../api/chat";
 
-function GroupChat({ onSelectGroupChat }) {
+function GroupChat({ onSelectGroupChatModal, onSelectChat }) {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [groupName, setGroupName] = useState("");
   const [groupMembers, setGroupMembers] = useState([]);
@@ -43,7 +43,10 @@ function GroupChat({ onSelectGroupChat }) {
     }
     try {
       const memberIds = groupMembers.map((member) => member.id);
-      await createGroupChat(groupName, memberIds); // we are sending the member ids and group name to the backend
+      const res = await createGroupChat(groupName, memberIds); // we are sending the member ids and group name to the backend
+      onSelectChat(res);
+      //   console.log("GroupChat.jsx, res=", res);
+      onSelectGroupChatModal(false); // close the group chat modal
     } catch (error) {
       console.error(error);
     }
@@ -111,7 +114,7 @@ function GroupChat({ onSelectGroupChat }) {
             </button>
             <button
               type="button"
-              onClick={() => onSelectGroupChat(false)}
+              onClick={() => onSelectGroupChatModal(false)}
               className="bg-primary text-white font-poppins py-1.5 w-[60%] m-auto rounded-md cursor-pointer"
             >
               Close

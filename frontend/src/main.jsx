@@ -7,6 +7,7 @@ import SignUp from "./pages/SignUp.jsx";
 import Login from "./pages/Login.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import { AuthProvider } from "./components/AuthProvider.jsx";
+import { SocketProvider } from "./components/SocketProvider.jsx";
 
 const router = createBrowserRouter([
   {
@@ -32,7 +33,9 @@ const router = createBrowserRouter([
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <AuthProvider>
-      <RouterProvider router={router}></RouterProvider>
+      <SocketProvider>
+        <RouterProvider router={router}></RouterProvider>
+      </SocketProvider>
     </AuthProvider>
   </StrictMode>,
 );

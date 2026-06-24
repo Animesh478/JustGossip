@@ -1,4 +1,4 @@
-const { Message } = require("../models/index");
+const { Message, User } = require("../models/index");
 
 const addMessage = async function (userId, message, chatId) {
   console.log("inside message");
@@ -7,9 +7,19 @@ const addMessage = async function (userId, message, chatId) {
     message,
     chatId,
   });
-  if (!newMessage) throw new Error("cannot add message");
 
-  return newMessage;
+  const fullMessage = await Message.findByPk(newMessage.id, {
+    include: [
+      {
+        model: User,
+        as: "sender",
+        attributes: ["id", "username", "profilePictureUrl"],
+      },
+    ],
+  });
+  if (!fullMessage) throw new Error("cannot add message");
+
+  return fullMessage;
 };
 
 const fetchMessage = async function (chatId) {
@@ -18,6 +28,13 @@ const fetchMessage = async function (chatId) {
       chatId,
     },
     order: [["created_at", "ASC"]],
+    include: [
+      {
+        model: User,
+        as: "sender",
+        attributes: ["id", "username", "profilePictureUrl"],
+      },
+    ],
   });
   return messages;
 };

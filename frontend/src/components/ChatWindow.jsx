@@ -1,68 +1,87 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { fetchMessagesForChat, sendMessage } from "../api/message";
 import ChatHeader from "./ChatHeader";
 import MessageInput from "./MessageInput";
 import Messages from "./Messages";
-import { createSocketConnection } from "../../utils/socket";
+// import { createSocketConnection } from "../../utils/socket";
+import { useSocket } from "./SocketContext";
 // import { useAuth } from "./AuthContext";
 
 function ChatWindow({ activeChat }) {
   // const userAuth = useAuth();
   const [messages, setMessages] = useState([]);
   // console.log("chat window messages=", messages);
-
   // console.log("chatWindow.jsx, active chat = ", activeChat);
 
+  const { socket } = useSocket();
+
   // use this ref to hold the socket, so we can access it outside the useEffect
-  const socketRef = useRef();
+  // const socketRef = useRef();
 
   // --- SOCKET.IO ROOM LOGIC ---
   useEffect(() => {
-    if (activeChat) {
-      // create a socket connection as soon as the chat window loads
-      socketRef.current = createSocketConnection();
+    // if no chat is selected or the global socket is not ready, do nothing
+    if (!activeChat || !socket) return;
+    // if (activeChat) {
+    // create a socket connection as soon as the chat window loads
+    // socketRef.current = createSocketConnection();
 
-      // 1. Join the specific chat room using the chat id
-      // we have to wait for the socket to successfully connect before joining
-      socketRef.current.on("connect", () => {
-        console.log(
-          "🟢 Socket officially connected! Joining room...",
-          activeChat.chatId,
-        );
-        socketRef.current.emit("join_chat", { chatId: activeChat.chatId });
-      });
+    // 1. Join the specific chat room using the chat id
+    // we have to wait for the socket to successfully connect before joining
+    // socketRef.current.on("connect", () => {
+    //   console.log(
+    //     "🟢 Socket officially connected! Joining room...",
+    //     activeChat.chatId,
+    //   );
+    //   socketRef.current.emit("join_chat", { chatId: activeChat.chatId });
+    // });
+    socket.emit("join_chat", { chatId: activeChat.chatId });
+    console.log(
+      "🟢 Socket officially connected! Joining room...",
+      activeChat.chatId,
+    );
 
-      // 2. Fetch the historical messages for this specific chat from the db
-      const fetchHistoricalMessages = async function () {
-        try {
-          const data = await fetchMessagesForChat(activeChat.chatId);
-          setMessages(data); // populating the state with the chat history
-          // console.log("messages=", data);
-        } catch (error) {
-          console.log(error);
-        }
-      };
-
-      fetchHistoricalMessages();
-
-      // 3. listen for the incoming live messages from the other user
-      socketRef.current.on("receive_message", (incomingMessage) => {
-        console.log("receive message=", incomingMessage);
-        setMessages((prevMessages) => [...prevMessages, incomingMessage]);
-      });
-    }
-
-    return () => {
-      if (socketRef.current) {
-        socketRef.current.disconnect();
+    // 2. Fetch the historical messages for this specific chat from the db
+    const fetchHistoricalMessages = async function () {
+      try {
+        const data = await fetchMessagesForChat(activeChat.chatId);
+        setMessages(data); // populating the state with the chat history
+        console.log("chatWindow.jsx, messages=", data);
+      } catch (error) {
+        console.log(error);
       }
     };
-  }, [activeChat]);
+
+    fetchHistoricalMessages();
+
+    // 3. listen for the incoming live messages from the other user
+    const handleReceiveMessage = function (incomingMessage) {
+      // only append message if it belongs to the currently active chat window
+      console.log("chatWindow.jsx, message received");
+      if (incomingMessage.chatId === activeChat.chatId) {
+        setMessages((prevMessages) => [...prevMessages, incomingMessage]);
+      }
+    };
+    socket.on("receive_message", handleReceiveMessage);
+    // socketRef.current.on("receive_message", (incomingMessage) => {
+    //   console.log("receive message=", incomingMessage);
+    //   setMessages((prevMessages) => [...prevMessages, incomingMessage]);
+    // });
+    // }
+
+    return () => {
+      // if (socketRef.current) {
+      //   socketRef.current.disconnect();
+      // }
+      socket.off("receive_message", handleReceiveMessage);
+    };
+  }, [activeChat, socket]);
 
   // --- SOCKET.IO LIVE MESSAGE LOGIC ---
 
   const handleSendMessage = async function (message) {
+    if (!socket) return;
     try {
       // 1. save the message to the database
       const newMessage = await sendMessage(message, activeChat.chatId);
@@ -73,7 +92,7 @@ function ChatWindow({ activeChat }) {
       setMessages((prevMessages) => [...prevMessages, newMessage]);
 
       // 3. emit the message to the other user
-      socketRef.current.emit("send_message", newMessage);
+      socket.emit("send_message", newMessage);
     } catch (error) {
       console.error("Failed to send message", error);
     }

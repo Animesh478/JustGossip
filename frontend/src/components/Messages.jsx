@@ -22,9 +22,15 @@ function Messages({ messages }) {
         return (
           <div
             key={message.id}
-            className={`max-w-[70%] min-w-[30%] wrap-break-word p-2 rounded-lg font-roboto ${currentUser.id === message.senderId ? "bg-blue-500 text-white self-end text-right rounded-tl-none" : "bg-gray-200 text-gray-900 self-start rounded-tr-none"}`}
+            className={`max-w-[70%] min-w-[30%] wrap-break-word p-2 rounded-lg font-poppins ${currentUser.id === message.senderId ? "bg-blue-500 text-white self-end text-right rounded-tl-none" : "bg-gray-200 text-gray-900 self-start rounded-tr-none"}`}
           >
-            {message.message}
+            {message.senderId !== currentUser.id && (
+              <div className="text-[0.7rem] font-poppins capitalize font-semibold text-primary">
+                {message.sender.username}
+              </div>
+            )}
+
+            <div>{message.message}</div>
           </div>
         );
       })}

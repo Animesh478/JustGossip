@@ -6,7 +6,7 @@ const {
 
 const signUp = async function (req, res) {
   const userData = req.body;
-  console.log(userData);
+  // console.log(userData);
 
   if (!userData.email || !userData.password) {
     res.status(400).json({ message: "Email and password required" });
@@ -22,7 +22,7 @@ const signUp = async function (req, res) {
 
 const login = async function (req, res) {
   const userCredentials = req.body;
-  console.log(userCredentials);
+  // console.log(userCredentials);
   try {
     const { token, user } = await loginUser(userCredentials);
     res.cookie("access_token", token, {

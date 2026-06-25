@@ -11,7 +11,7 @@ import { useSocket } from "./SocketContext";
 function ChatWindow({ activeChat }) {
   // const userAuth = useAuth();
   const [messages, setMessages] = useState([]);
-  // console.log("chat window messages=", messages);
+  console.log("chat window messages=", messages);
   // console.log("chatWindow.jsx, active chat = ", activeChat);
 
   const { socket } = useSocket();
@@ -109,8 +109,12 @@ function ChatWindow({ activeChat }) {
   return (
     <div className="flex flex-col flex-1 border-l border-stone-300 bg-primary-light">
       <ChatHeader activeChat={activeChat} />
-      <Messages messages={messages} />
-      <MessageInput onSendMessage={handleSendMessage} />
+      <Messages messages={messages} activeChat={activeChat} />
+      <MessageInput
+        onSendMessage={handleSendMessage}
+        messages={messages}
+        userTone="casual"
+      />
     </div>
   );
 }

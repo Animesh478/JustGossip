@@ -24,7 +24,7 @@ function ChatHeader({ activeChat }) {
           </svg>
         )}
 
-        <h2 className="font-semibold text-lg font-poppins">
+        <h2 className="font-semibold text-lg font-poppins capitalize">
           {activeChat.isGroup
             ? activeChat.chatName
             : activeChat.receiver?.username}

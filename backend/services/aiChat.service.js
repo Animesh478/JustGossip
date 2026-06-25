@@ -1,6 +1,6 @@
 const { GoogleGenAI } = require("@google/genai");
 
-const genAI = new GoogleGenAI(process.env.GEMINI_API_KEY);
+const genAI = new GoogleGenAI({});
 
 const aiService = {
   // Service 1 - Generate smart replies based on recent chat history
@@ -18,7 +18,7 @@ const aiService = {
         model: "gemini-2.5-flash",
         contents: prompt,
       });
-      const text = result?.response?.text();
+      const text = result?.text;
       return JSON.parse(text.trim());
     } catch (error) {
       console.log("Failed to generate smart replies:", error);
@@ -39,11 +39,10 @@ const aiService = {
 
     try {
       const result = await genAI.models.generateContent({
-        model: "gemini-3.5-flash",
+        model: "gemini-2.5-flash",
         contents: prompt,
       });
-      console.log("ai chat service, predictions, result=", result);
-      const text = result?.response?.text();
+      const text = result?.text;
       return JSON.parse(text.trim());
     } catch (error) {
       console.log("Failed to generate predictive text:", error);

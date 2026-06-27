@@ -34,7 +34,17 @@ module.exports = (sequelize, DataTypes) => {
       },
       message: {
         type: DataTypes.TEXT,
-        allowNull: false,
+        allowNull: true,
+      },
+      mediaUrl: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        field: "media_url",
+      },
+      mediaType: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        field: "media_type",
       },
       senderId: {
         type: DataTypes.UUID,

@@ -11,7 +11,7 @@ import { SocketProvider } from "./components/SocketProvider.jsx";
 
 const router = createBrowserRouter([
   {
-    path: "/chat",
+    path: "/",
     element: <ProtectedRoute />,
     children: [
       {

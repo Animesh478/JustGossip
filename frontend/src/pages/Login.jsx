@@ -20,7 +20,7 @@ function Login() {
       const res = await apiClient.post("/user-auth/login", userCredentials);
       // console.log("user logged in=", res.data);
       setCurrentUser(res?.data);
-      navigate("/chat");
+      navigate("/");
     } catch (error) {
       console.log("Error:", error);
     }

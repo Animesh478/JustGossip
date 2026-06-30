@@ -1,5 +1,5 @@
 function ChatHeader({ activeChat }) {
-  // console.log("active chat obj chat header=", activeChat);
+  console.log("active chat obj chat header=", activeChat);
 
   const targetUser = activeChat.isGroup ? null : activeChat.receiver;
   return (

@@ -4,6 +4,7 @@ const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 require("dotenv").config();
+require("./services/archiveMessages.service");
 
 const authenticationRouter = require("./routes/authentication.routes");
 const messageRouter = require("./routes/message.routes");

@@ -22,9 +22,10 @@ const sendMessage = async function (req, res) {
 
 const getMessage = async function (req, res) {
   const chatId = req.params.chatId;
+  const cursorDate = req.query.cursorDate;
 
   try {
-    const messages = await fetchMessage(chatId);
+    const messages = await fetchMessage(chatId, cursorDate);
     res.status(200).json(messages);
   } catch (error) {
     console.log(error);

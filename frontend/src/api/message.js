@@ -12,9 +12,11 @@ export const sendMessage = async function (message, chatId) {
   }
 };
 
-export const fetchMessagesForChat = async function (chatId) {
+export const fetchMessagesForChat = async function (chatId, cursorDate) {
   try {
-    const res = await apiClient.get(`/messages/${chatId}`);
+    const res = await apiClient.get(
+      `/messages/${chatId}?cursorDate=${cursorDate}`,
+    );
     return res.data;
   } catch (error) {
     console.log(error);

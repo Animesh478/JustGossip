@@ -1,6 +1,8 @@
 // import button from "daisyui/components/button";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { fetchPredictions, fetchSmartReplies } from "../api/aiChat";
+
+console.log("rendering");
 
 function useDebounce(value, delay) {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -12,10 +14,19 @@ function useDebounce(value, delay) {
   return debouncedValue;
 }
 
-function MessageInput({ onSendMessage, messages, userTone = "casual" }) {
+function MessageInput({
+  onSendMessage,
+  messages,
+  activeChat,
+  userTone = "casual",
+}) {
   const [newMessage, setNewMessage] = useState("");
   const [smartReplies, setSmartReplies] = useState([]);
   const [predictions, setPredictions] = useState([]);
+
+  // state for uploading media
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef(null);
 
   // debouncing the input text by 400ms
   const debouncedText = useDebounce(newMessage, 400);
@@ -66,6 +77,8 @@ function MessageInput({ onSendMessage, messages, userTone = "casual" }) {
     fetchMessagePredictions();
   }, [debouncedText, userTone]);
 
+  // Handlers
+
   const handleSendMessage = function () {
     if (!newMessage.trim()) return;
     console.log("new message in message input=", newMessage);
@@ -85,6 +98,29 @@ function MessageInput({ onSendMessage, messages, userTone = "casual" }) {
     // append the prediction to the current input text
     setNewMessage((prev) => `${prev.trim()} ${prediction}`);
     setPredictions([]);
+  };
+
+  // Media upload handler
+  const handleMediaUpload = async function (e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("chatId", activeChat.chatId);
+
+    try {
+      // send file to the backend
+      // the backend returns the message object
+      // send it to ChatWindow.jsx to update the ui and emit via socket
+    } catch (error) {
+      console.error("Upload failed", error);
+      alert("Failed to upload image");
+    } finally {
+      setIsUploading(false);
+      fileInputRef.current.value = null;
+    }
   };
 
   return (
@@ -119,7 +155,39 @@ function MessageInput({ onSendMessage, messages, userTone = "casual" }) {
             );
           })}
       </div>
+
       <div className="flex items-center gap-2 px-4 py-3">
+        {/* Hidden file input */}
+        <input
+          type="file"
+          className="hidden"
+          accept="image/*,video/*"
+          ref={fileInputRef}
+          onChange={handleMediaUpload}
+        />
+
+        {/* Attachment button */}
+        <button
+          className="cursor-pointer bg-primary rounded-full p-2 hover:bg-primary-light border hover:border-primary group transition-colors"
+          onClick={() => fileInputRef.current.click()}
+          disabled={isUploading}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={3}
+            className="size-4 stroke-white group-hover:stroke-gray-600 transition-colors"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"
+            />
+          </svg>
+        </button>
+
+        {/* Input text box */}
         <input
           type="text"
           placeholder="Type a message"

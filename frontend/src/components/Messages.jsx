@@ -1,21 +1,61 @@
 import { useEffect, useRef } from "react";
 import { useAuth } from "./AuthContext";
+import { useState } from "react";
 
-function Messages({ messages, activeChat }) {
+function Messages({ messages, activeChat, fetchOlderMessages }) {
   const userAuth = useAuth();
   const currentUser = userAuth.currentUser;
 
   const chatEndRef = useRef(null);
+  const topSensorRef = useRef(null);
+
+  // state to track if we are currently loading older messages
+  const [isLoadingOlderMessages, setIsLoadingOlderMessages] = useState(false);
 
   const scrollToBottom = function () {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  // Intersection observer logic
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-  // console.log("messages.jsx user auth = ", userAuth);
-  // console.log("messages messages.jsx=", messages);
+    // if there are no messages don't observe
+    if (!topSensorRef.current || messages.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      async (entries) => {
+        const firstEntry = entries[0];
+
+        // if the top sensor is visible on the screen and we are not loading
+        if (firstEntry.isIntersecting && !isLoadingOlderMessages) {
+          setIsLoadingOlderMessages(true);
+
+          await fetchOlderMessages();
+
+          setIsLoadingOlderMessages(false);
+        }
+      },
+      {
+        root: null,
+        rootMargin: "0px",
+        threshold: 1.0,
+      },
+    );
+
+    // start observing the sensor
+    observer.observe(topSensorRef.current);
+
+    // clean up
+    return () => {
+      observer.disconnect();
+    };
+  }, [fetchOlderMessages, isLoadingOlderMessages, messages]);
+
+  useEffect(() => {
+    if (!isLoadingOlderMessages) {
+      scrollToBottom();
+    }
+  }, [messages, isLoadingOlderMessages]);
+
   return (
     <main className="flex-1 px-4 py-3 overflow-y-auto  flex flex-col gap-2">
       {messages.map((message) => {
@@ -23,7 +63,6 @@ function Messages({ messages, activeChat }) {
         return (
           <div
             key={message.id}
-            // className={`max-w-[70%] min-w-[30%] wrap-break-word p-2 rounded-lg font-poppins ${isMyMessage ? "bg-blue-500 text-white self-end text-right rounded-tl-none" : "bg-gray-200 text-gray-900 self-start rounded-tr-none"}`}
             className={` flex flex-col ${isMyMessage ? "items-end" : "items-start"}`}
           >
             {/* Sender name */}

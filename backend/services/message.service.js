@@ -1,8 +1,25 @@
-const { Message, ArchivedMessages, User } = require("../models/index");
+const {
+  Message,
+  ArchivedMessages,
+  User,
+  ChatParticipants,
+} = require("../models/index");
 const { Op } = require("sequelize");
 
 const addMessage = async function (userId, message, chatId) {
-  console.log("inside message");
+  // check whether a record exists linking this user to this chat
+  const isParticipant = await ChatParticipants.findOne({
+    where: {
+      chatId,
+      userId,
+    },
+  });
+
+  if (!isParticipant) {
+    throw new Error("Unauthorized: User is not a part of this chat");
+  }
+
+  // console.log("inside message");
   const newMessage = await Message.create({
     senderId: userId,
     message,
@@ -54,20 +71,6 @@ const fetchMessage = async function (chatId, cursorDate, limit = 50) {
       ],
     });
   }
-
-  // const messages = await Message.findAll({
-  //   where: {
-  //     chatId,
-  //   },
-  //   order: [["created_at", "ASC"]],
-  //   include: [
-  //     {
-  //       model: User,
-  //       as: "sender",
-  //       attributes: ["id", "username", "profilePictureUrl"],
-  //     },
-  //   ],
-  // });
 
   // 2. fetch from archived table
   // if the active table doesnot have enough messages(from the cutoff date) to fulfill the limit, we cross the cutoff date boundary and pull the rest of the messages from the archived table

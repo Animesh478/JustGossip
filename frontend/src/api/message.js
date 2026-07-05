@@ -3,8 +3,6 @@ import apiClient from "./axios";
 export const sendMessage = async function (message, chatId) {
   try {
     const res = await apiClient.post("/messages", { message, chatId });
-    console.log("new message=", res);
-    // const newMessage = res.data.data;
     return res.data;
   } catch (error) {
     console.log(error);
@@ -18,6 +16,20 @@ export const fetchMessagesForChat = async function (chatId, cursorDate) {
       `/messages/${chatId}?cursorDate=${cursorDate}`,
     );
     return res.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const sendMediaFile = async function (formData) {
+  try {
+    const result = await apiClient.post(`/messages/media`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return result.data;
   } catch (error) {
     console.log(error);
     throw error;

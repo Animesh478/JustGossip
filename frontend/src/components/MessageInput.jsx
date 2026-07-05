@@ -1,8 +1,9 @@
 // import button from "daisyui/components/button";
 import { useEffect, useRef, useState } from "react";
 import { fetchPredictions, fetchSmartReplies } from "../api/aiChat";
+import { sendMediaFile } from "../api/message";
 
-console.log("rendering");
+// console.log("rendering");
 
 function useDebounce(value, delay) {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -18,6 +19,7 @@ function MessageInput({
   onSendMessage,
   messages,
   activeChat,
+  onSendMediaMessage,
   userTone = "casual",
 }) {
   const [newMessage, setNewMessage] = useState("");
@@ -42,10 +44,10 @@ function MessageInput({
         .map((message) => `${message.senderId}: ${message.message}`)
         .join("\n");
 
-      console.log("message input.jsx, historyStr = ", historyStr);
+      // console.log("message input.jsx, historyStr = ", historyStr);
       try {
         const { data } = await fetchSmartReplies(historyStr, userTone);
-        console.log("messageInput.jsx, smart replies data = ", data);
+        // console.log("messageInput.jsx, smart replies data = ", data);
         setSmartReplies(data.replies);
       } catch (error) {
         console.error("Smart replies failed", error);
@@ -67,7 +69,7 @@ function MessageInput({
 
       try {
         const { data } = await fetchPredictions(debouncedText, userTone);
-        console.log("messageInput.jsx, predictions data = ", data);
+        // console.log("messageInput.jsx, predictions data = ", data);
         setPredictions(data.suggestions);
       } catch (error) {
         console.error("Failed to fetch predictions", error);
@@ -78,10 +80,9 @@ function MessageInput({
   }, [debouncedText, userTone]);
 
   // Handlers
-
   const handleSendMessage = function () {
     if (!newMessage.trim()) return;
-    console.log("new message in message input=", newMessage);
+    // console.log("new message in message input=", newMessage);
     onSendMessage(newMessage);
     setNewMessage("");
     setSmartReplies([]);
@@ -106,14 +107,18 @@ function MessageInput({
     if (!file) return;
 
     setIsUploading(true);
+
+    // const chatId = activeChat.chatId;
     const formData = new FormData();
-    formData.append("file", file);
     formData.append("chatId", activeChat.chatId);
+    formData.append("file", file);
 
     try {
       // send file to the backend
+      const result = await sendMediaFile(formData);
       // the backend returns the message object
       // send it to ChatWindow.jsx to update the ui and emit via socket
+      onSendMediaMessage(result);
     } catch (error) {
       console.error("Upload failed", error);
       alert("Failed to upload image");

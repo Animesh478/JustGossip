@@ -1,3 +1,4 @@
+const { sendMedia } = require("../services/mediaShare.service");
 const { addMessage, fetchMessage } = require("../services/message.service");
 
 const sendMessage = async function (req, res) {
@@ -33,7 +34,26 @@ const getMessage = async function (req, res) {
   }
 };
 
+const sendMediaMessage = async function (req, res) {
+  const userId = req.user.id;
+  const { chatId } = req.body;
+  const file = req.file;
+
+  if (!file) {
+    return res.status(400).json({ message: "No file uploaded" });
+  }
+
+  try {
+    const result = await sendMedia(userId, chatId, file);
+    res.status(201).json(result);
+  } catch (error) {
+    console.error("Media upload failed", error);
+    res.status(500).json({ message: "Media upload failed" });
+  }
+};
+
 module.exports = {
   sendMessage,
   getMessage,
+  sendMediaMessage,
 };

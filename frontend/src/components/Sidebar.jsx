@@ -3,7 +3,7 @@ import { fetchTargetUser } from "../api/user";
 import { accessOrCreateChat } from "../api/chat";
 
 function Sidebar({ onSelectChat, chats, onSelectGroupChatModal }) {
-  console.log("sidebar component is rendered");
+  // console.log("sidebar component is rendered");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [searchResult, setSearchResult] = useState(null); // what we search in the search bar
   const [showModal, setShowModal] = useState(true); // for the contact modal
@@ -24,7 +24,7 @@ function Sidebar({ onSelectChat, chats, onSelectGroupChatModal }) {
     try {
       // send the target user's ID to the backend to get/create the chat
       const chatData = await accessOrCreateChat(searchResult.id);
-      console.log("sidebar.jsx, contact modal clicked");
+      // console.log("sidebar.jsx, contact modal clicked");
       onSelectChat(chatData);
       setPhoneNumber("");
       setShowModal(false);

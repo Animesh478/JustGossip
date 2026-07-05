@@ -18,7 +18,7 @@ export const SocketProvider = ({ children }) => {
       const newSocket = createSocketConnection();
 
       newSocket.on("connect", () => {
-        console.log("🟢 Global Socket connected:", newSocket.id);
+        console.log("Global Socket connected:", newSocket.id);
 
         // save the socket to a state so the children can access it
         setSocket(newSocket);
@@ -26,7 +26,7 @@ export const SocketProvider = ({ children }) => {
 
       // clean up function runs when component unmounts or the user changes
       return () => {
-        console.log("🔴 Disconnecting global socket...");
+        console.log("Disconnecting global socket...");
         newSocket.disconnect();
         setSocket(null);
       };

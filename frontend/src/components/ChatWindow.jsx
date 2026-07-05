@@ -5,13 +5,10 @@ import ChatHeader from "./ChatHeader";
 import MessageInput from "./MessageInput";
 import Messages from "./Messages";
 import { useSocket } from "./SocketContext";
-// import { useAuth } from "./AuthContext";
 
 function ChatWindow({ activeChat }) {
   // const userAuth = useAuth();
   const [messages, setMessages] = useState([]);
-  console.log("chat window messages=", messages);
-  // console.log("chatWindow.jsx, active chat = ", activeChat);
 
   const { socket } = useSocket();
 
@@ -36,7 +33,6 @@ function ChatWindow({ activeChat }) {
           "",
         );
         setMessages(initialMessages); // populating the state with the chat history
-        console.log("chatWindow.jsx, messages=", initialMessages);
       } catch (error) {
         console.log(error);
       }
@@ -47,7 +43,6 @@ function ChatWindow({ activeChat }) {
     // 3. listen for the incoming live messages from the other user
     const handleReceiveMessage = function (incomingMessage) {
       // only append message if it belongs to the currently active chat window
-      console.log("chatWindow.jsx, message received");
       if (incomingMessage.chatId === activeChat.chatId) {
         setMessages((prevMessages) => [...prevMessages, incomingMessage]);
       }
@@ -68,7 +63,7 @@ function ChatWindow({ activeChat }) {
       // 1. save the message to the database
       const newMessage = await sendMessage(message, activeChat.chatId);
       // newMessage : {id, senderId, message, chatId, createdAt, updatedAt}
-      console.log("message chat window =", newMessage);
+      // console.log("message chat window =", newMessage);
 
       // 2. update the ui immediately
       setMessages((prevMessages) => [...prevMessages, newMessage]);
@@ -78,6 +73,13 @@ function ChatWindow({ activeChat }) {
     } catch (error) {
       console.error("Failed to send message", error);
     }
+  };
+
+  const handleSendMediaMessage = async function (newMediaMessage) {
+    if (!socket) return;
+
+    setMessages((prevMessages) => [...prevMessages, newMediaMessage]);
+    socket.emit("send_message", newMediaMessage);
   };
 
   const fetchOlderMessages = async function () {
@@ -116,6 +118,7 @@ function ChatWindow({ activeChat }) {
         messages={messages}
         userTone="casual"
         activeChat={activeChat}
+        onSendMediaMessage={handleSendMediaMessage}
       />
     </div>
   );

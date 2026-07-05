@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useAuth } from "./AuthContext";
-import { useState } from "react";
+// import { useState } from "react";
 
 function Messages({ messages, activeChat, fetchOlderMessages }) {
   const userAuth = useAuth();
@@ -8,9 +8,11 @@ function Messages({ messages, activeChat, fetchOlderMessages }) {
 
   const chatEndRef = useRef(null);
   const topSensorRef = useRef(null);
+  const isLoadingRef = useRef(false);
+  const scrollContainerRef = useRef(null);
 
   // state to track if we are currently loading older messages
-  const [isLoadingOlderMessages, setIsLoadingOlderMessages] = useState(false);
+  // const [isLoadingOlderMessages, setIsLoadingOlderMessages] = useState(false);
 
   const scrollToBottom = function () {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -20,22 +22,23 @@ function Messages({ messages, activeChat, fetchOlderMessages }) {
   useEffect(() => {
     // if there are no messages don't observe
     if (!topSensorRef.current || messages.length === 0) return;
+    if (messages.length < 50) return;
 
     const observer = new IntersectionObserver(
       async (entries) => {
         const firstEntry = entries[0];
 
         // if the top sensor is visible on the screen and we are not loading
-        if (firstEntry.isIntersecting && !isLoadingOlderMessages) {
-          setIsLoadingOlderMessages(true);
+        if (firstEntry.isIntersecting && !isLoadingRef.current) {
+          isLoadingRef.current = true;
 
           await fetchOlderMessages();
 
-          setIsLoadingOlderMessages(false);
+          isLoadingRef.current = false;
         }
       },
       {
-        root: null,
+        root: scrollContainerRef.current,
         rootMargin: "0px",
         threshold: 1.0,
       },
@@ -48,16 +51,23 @@ function Messages({ messages, activeChat, fetchOlderMessages }) {
     return () => {
       observer.disconnect();
     };
-  }, [fetchOlderMessages, isLoadingOlderMessages, messages]);
+  }, [fetchOlderMessages, messages]);
 
   useEffect(() => {
-    if (!isLoadingOlderMessages) {
+    // when loading older messages and the user receives a new message, it should not scroll to the bottom
+    if (!isLoadingRef.current) {
       scrollToBottom();
     }
-  }, [messages, isLoadingOlderMessages]);
+  }, [messages]);
 
   return (
-    <main className="flex-1 px-4 py-3 overflow-y-auto  flex flex-col gap-2">
+    <main
+      className="flex-1 px-4 py-3 overflow-y-auto  flex flex-col gap-2"
+      ref={scrollContainerRef}
+    >
+      {/* Sensor Div */}
+      <div ref={topSensorRef} className="h-4 w-full" />
+
       {messages.map((message) => {
         const isMyMessage = currentUser.id === message.senderId;
         return (
@@ -76,7 +86,26 @@ function Messages({ messages, activeChat, fetchOlderMessages }) {
             <div
               className={`wrap-break-word p-2 rounded-2xl font-poppins ${isMyMessage ? "bg-blue-600 text-white rounded-br-none" : "bg-white border border-stone-200 text-stone-800 rounded-bl-none"}`}
             >
-              <p>{message.message}</p>
+              {/* render media if it exists */}
+              {message.mediaUrl && (
+                <div>
+                  <div>
+                    {message.mediaType &&
+                      message.mediaType.startsWith("image/") && (
+                        <img
+                          src={message.mediaUrl}
+                          alt=""
+                          className="rounded-lg max-w-full h-auto object-cover max-h-64"
+                          loading="lazy"
+                        />
+                      )}
+                  </div>
+                  <a href={message.mediaUrl} target="_blank">
+                    See image
+                  </a>
+                </div>
+              )}
+              {message.message && <p>{message.message}</p>}
             </div>
 
             {/* Timestamp */}
